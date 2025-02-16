@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Security Analyst Training Simulator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f2f5;
+            line-height: 1.6;
+        }
+
+        .game-container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .level {
+            display: none;
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background-color: #fafafa;
+        }
+
+        .level.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .info-box {
+            background-color: #e3f2fd;
+            padding: 15px;
+            border-left: 4px solid #1976d2;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+
+        .warning-box {
+            background-color: #fff3e0;
+            padding: 15px;
+            border-left: 4px solid #ff9800;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+
+        .database-check {
+            display: flex;
+            gap: 15px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background-color: #1976d2;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .btn:hover:not(:disabled) {
+            background-color: #1565c0;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .btn-secondary {
+            background-color: #78909c;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background-color: #607d8b;
+        }
+
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+
+        .success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border-left: 4px solid #2e7d32;
+        }
+
+        .error {
+            background-color: #fbe9e7;
+            color: #d32f2f;
+            border-left: 4px solid #d32f2f;
+        }
+
+        .progress-container {
+            margin-bottom: 30px;
+        }
+
+        .progress-bar {
+            background-color: #e9ecef;
+            border-radius: 8px;
+            overflow: hidden;
+            height: 24px;
+        }
+
+        .progress {
+            background-color: #1976d2;
+            height: 100%;
+            border-radius: 8px;
+            transition: width 0.5s ease-in-out;
+        }
+
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .ip-input {
+            padding: 12px;
+            margin-right: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            width: 250px;
+            transition: border-color 0.3s;
+        }
+
+        .ip-input:focus {
+            border-color: #1976d2;
+            outline: none;
+        }
+
+        .checklist {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+        }
+
+        .checklist label {
+            display: block;
+            margin: 10px 0;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .checklist label:hover {
+            background: #e0e0e0;
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            margin-left: 8px;
+            cursor: help;
+        }
+
+        .tooltip-icon {
+            background: #1976d2;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .tooltip-text {
+            visibility: hidden;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 8px 12px;
+            border-radius: 6px;
+            width: 200px;
+            font-size: 0.9rem;
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+        }
+
+        #final-screen {
+            text-align: center;
+            display: none;
+            padding: 30px;
+        }
+
+        .summary-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .level-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .level-number {
+            background: #1976d2;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .database-result {
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 6px;
+            background: white;
+            border: 1px solid #ddd;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .metric-title {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .metric-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>Advanced Security Analyst Training Simulator</h1>
+            <p>Learn to identify, analyze, and respond to potential security threats</p>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress" style="width: 0%"></div>
+            </div>
+            <div class="progress-labels">
+                <span>IP Analysis</span>
+                <span>Database Checks</span>
+                <span>Threat Assessment</span>
+                <span>Response Actions</span>
+                <span>Final Report</span>
+            </div>
+        </div>
+
+        <div id="level1" class="level active">
+            <div class="level-header">
+                <h2>Level 1: Initial IP Analysis</h2>
+                <span class="level-number">Stage 1/5</span>
+            </div>
+            
+            <div class="info-box">
+                <h3>What is IP Analysis?</h3>
+                <p>IP analysis is the first step in investigating potential security threats. A valid IPv4 address consists of four numbers (0-255) separated by periods.</p>
+            </div>
+
+            <div class="warning-box">
+                <h3>Important:</h3>
+                <p>Before proceeding with the investigation, ensure you have a valid IP address to analyze. Common malicious activities include:</p>
+                <ul>
+                    <li>Port scanning</li>
+                    <li>Brute force attempts</li>
+                    <li>DDoS attacks</li>
+                </ul>
+            </div>
+
+            <div class="checklist">
+                <h3>Pre-Analysis Checklist:</h3>
+                <label><input type="checkbox"> Verify IP format</label>
+                <label><input type="checkbox"> Check if IP is internal or external</label>
+                <label><input type="checkbox"> Document initial findings</label>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <input type="text" id="ip-input" class="ip-input" placeholder="Enter suspicious IP (e.g., 192.168.1.1)">
+                <button class="btn" onclick="validateIP()">Analyze IP</button>
+                <div class="tooltip">
+                    <span class="tooltip-icon">?</span>
+                    <span class="tooltip-text">Enter an IPv4 address to begin the analysis</span>
+                </div>
+            </div>
+            <div id="level1-result" class="result"></div>
+        </div>
+
+        <div id="level2" class="level">
+            <div class="level-header">
+                <h2>Level 2: Database Checks</h2>
+                <span class="level-number">Stage 2/5</span>
+            </div>
+
+            <div class="info-box">
+                <h3>Security Databases Overview</h3>
+                <p>Security databases provide valuable information about known malicious IPs and their historical activities. Multiple sources should be checked for comprehensive analysis.</p>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-title">AbuseIPDB Confidence Score</div>
+                    <div class="metric-value" id="abuse-score">-</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-title">Reports Last 90 Days</div>
+                    <div class="metric-value" id="report-count">-</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-title">Talos Reputation</div>
+                    <div class="metric-value" id="talos-score">-</div>
+                </div>
+            </div>
+
+            <div class="database-check">
+                <button class="btn" onclick="checkDatabase('abuseipdb')">Check AbuseIPDB</button>
+                <button class="btn" onclick="checkDatabase('talos')">Check Cisco Talos</button>
+                <button class="btn btn-secondary" onclick="checkDatabase('whois')">WHOIS Lookup</button>
+            </div>
+            <div id="level2-result" class="result"></div>
+        </div>
+
+        <div id="level3" class="level">
+            <div class="level-header">
+                <h2>Level 3: Threat Assessment</h2>
+                <span class="level-number">Stage 3/5</span>
+            </div>
+
+            <div class="info-box">
+                <h3>Threat Assessment Criteria</h3>
+                <p>Consider the following factors when assessing threat levels:</p>
+                <ul>
+                    <li>Database reputation scores</li>
+                    <li>Number of recent reports</li>
+                    <li>Types of malicious activity</li>
+                    <li>Target systems or services</li>
+                </ul>
+            </div>
+
+            <div class="checklist">
+                <h3>Select Threat Level:</h3>
+                <select id="threat-level" class="ip-input">
+                    <option value="">Choose threat level...</option>
+                    <option value="low">Low - Minimal Risk</option>
+                    <option value="medium">Medium - Potential Risk</option>
+                    <option value="high">High - Significant Risk</option>
+                    <option value="critical">Critical - Immediate Action Required</option>
+                </select>
+                <div style="margin-top: 15px;">
+                    <button class="btn" onclick="assessThreat()">Submit Assessment</button>
+                </div>
+            </div>
+            <div id="level3-result" class="result"></div>
+        </div>
+
+        <div id="level4" class="level">
+            <div class="level-header">
+                <h2>Level 4: Response Actions</h2>
+                <span class="level-number">Stage 4/5</span>
+            </div>
+
+            <div class="warning-box">
+                <h3>Critical Response Steps</h3>
+                <p>Your response should follow security best practices and organizational procedures. Select all appropriate actions:</p>
+            </div>
+
+            <div class="checklist" id="escalation-steps">
+                <label><input type="checkbox" value="document"> Document all findings and evidence</label>
+                <label><input type="checkbox" value="notify"> Notify security team and stakeholders</label>
+                <label><input type="checkbox" value="block"> Implement IP blocking at firewall/IDS</label>
+                <label><input type="checkbox" value="report"> Report to security databases (AbuseIPDB)</label>
+                <label><input type="checkbox" value="monitor"> Monitor for similar patterns</label>
+                <label><input type="checkbox" value="update"> Update security rules and policies</label>
+            </div>
+
+            <button class="btn" onclick="handleEscalation()">Execute Response Plan</button>
+            <div id="level4-result" class="result"></div>
+        </div>
+
+        <div id="final-screen">
+            <h2>Investigation Complete!</h2>
+            <div class="summary-box">
+                <h3>Investigation Summary</h3>
+                <div id="investigation-summary"></div>
+            </div>
+            <button class="btn" onclick="resetGame()">Start New Investigation</button>
+        </div>
+    </div>
+
+    <script>
+        let currentLevel = 1;
+        let suspiciousIP = '';
+        let investigationData = {
+            ipAddress: '',
+            abuseScore: 0,
+            talosScore: 0,
+            reportCount: 0,
+            threatLevel: '',
+            responseActions: [],
+            timeline: []
+        };
+
+        function addToTimeline(action) {
+            const timestamp = new Date().toLocaleTimeString();
+            investigationData.timeline.push(`[${timestamp}] ${action}`);
+        }
+
+        function updateProgress() {
+            const progress = ((currentLevel - 1) / 5) * 100;
+            document.querySelector('.progress').style.width = progress + '%';
+        }
+
+        function showLevel(level) {
+            document.querySelectorAll('.level').forEach(el => el.classList.remove('active'));
+            document.getElementById(`level${level}`).classList.add('active');
+            updateProgress();
+        }
+
+        function validateIP() {
+            const ipInput = document.getElementById('ip-input').value;
+            const ipPattern = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+            
+            if (ipPattern.test(ipInput)) {
+                suspiciousIP = ipInput;
+                investigationData.ipAddress = ipInput;
+                addToTimeline(`Started investigation of IP: ${ipInput}`);
+                
+                const result = document.getElementById('level1-result');
+                result.innerHTML = `
+                    <div class="success">
+                        <h4>Initial Analysis Results:</h4>
+                        <ul>
+                            <li>Valid IPv4 format confirmed</li>
+                            <li>IP Classification: ${getIPClass(ipInput)}</li>
+                            <li>Geolocation: ${generateRandomLocation()}</li>
+                        </ul>
+                        <p>Proceeding to database checks...</p>
+                    </div>`;
+                
+                setTimeout(() => {
+                    currentLevel = 2;
+                    showLevel(2);
+                }, 2000);
+            } else {
+                document.getElementById('level1-result').innerHTML = `
+                    <div class="error">
+                        <h4>Invalid IP Format</h4>
+                        <p>Please enter a valid IPv4 address (e.g., 192.168.1.1)</p>
+                        <ul>
+                            <li>Each octet must be between 0 and 255</li>
+                            <li>Must contain exactly 4 octets</li>
+                            <li>Octets must be separated by periods</li>
+                        </ul>
+                    </div>`;
+            }
+        }
+
+        function getIPClass(ip) {
+            const firstOctet = parseInt(ip.split('.')[0]);
+            if (firstOctet <= 126) return 'Class A';
+            if (firstOctet <= 191) return 'Class B';
+            if (firstOctet <= 223) return 'Class C';
+            if (firstOctet <= 239) return 'Class D (Multicast)';
+            return 'Class E (Reserved)';
+        }
+
+        function generateRandomLocation() {
+            const locations = [
+                'United States, California',
+                'Netherlands, Amsterdam',
+                'Russia, Moscow',
+                'China, Beijing',
+                'Brazil, Sao Paulo'
+            ];
+            return locations[Math.floor(Math.random() * locations.length)];
+        }
+
+        let databasesChecked = {
+            abuseipdb: false,
+            talos: false,
+            whois: false
+        };
+
+        function checkDatabase(database) {
+            databasesChecked[database] = true;
+            const resultDiv = document.getElementById('level2-result');
+            let databaseResult = '';
+
+            switch(database) {
+                case 'abuseipdb':
+                    investigationData.abuseScore = Math.floor(Math.random() * 100);
+                    investigationData.reportCount = Math.floor(Math.random() * 1000);
+                    document.getElementById('abuse-score').textContent = `${investigationData.abuseScore}%`;
+                    document.getElementById('report-count').textContent = investigationData.reportCount;
+                    
+                    databaseResult = `
+                        <div class="database-result">
+                            <h4>AbuseIPDB Results:</h4>
+                            <ul>
+                                <li>Confidence Score: ${investigationData.abuseScore}%</li>
+                                <li>Total Reports: ${investigationData.reportCount}</li>
+                                <li>Latest Activity: ${Math.floor(Math.random() * 24)} hours ago</li>
+                            </ul>
+                        </div>`;
+                    break;
+
+                case 'talos':
+                    investigationData.talosScore = Math.floor(Math.random() * 100);
+                    document.getElementById('talos-score').textContent = `${investigationData.talosScore}%`;
+                    
+                    databaseResult = `
+                        <div class="database-result">
+                            <h4>Cisco Talos Results:</h4>
+                            <ul>
+                                <li>Reputation Score: ${investigationData.talosScore}%</li>
+                                <li>Blacklist Status: ${investigationData.talosScore < 50 ? 'Listed' : 'Not Listed'}</li>
+                                <li>Web Category: ${getRandomCategory()}</li>
+                            </ul>
+                        </div>`;
+                    break;
+
+                case 'whois':
+                    databaseResult = `
+                        <div class="database-result">
+                            <h4>WHOIS Information:</h4>
+                            <ul>
+                                <li>Registration Date: ${generateRandomDate()}</li>
+                                <li>Network: ${generateRandomNetwork()}</li>
+                                <li>Organization: ${generateRandomOrg()}</li>
+                            </ul>
+                        </div>`;
+                    break;
+            }
+
+            resultDiv.innerHTML += databaseResult;
+            addToTimeline(`Checked ${database.toUpperCase()} database`);
+
+            if (databasesChecked.abuseipdb && databasesChecked.talos) {
+                const proceedButton = document.createElement('button');
+                proceedButton.className = 'btn';
+                proceedButton.style.marginTop = '20px';
+                proceedButton.textContent = 'Proceed to Threat Assessment';
+                proceedButton.onclick = () => {
+                    currentLevel = 3;
+                    showLevel(3);
+                };
+                resultDiv.appendChild(proceedButton);
+            }
+        }
+
+        function getRandomCategory() {
+            const categories = ['Malware', 'Spam', 'Phishing', 'Botnet', 'Scanning'];
+            return categories[Math.floor(Math.random() * categories.length)];
+        }
+
+        function generateRandomDate() {
+            const start = new Date(2020, 0, 1);
+            const end = new Date();
+            return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime())).toLocaleDateString();
+        }
+
+        function generateRandomNetwork() {
+            return `${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.0.0/16`;
+        }
+
+        function generateRandomOrg() {
+            const orgs = ['CloudHost LLC', 'DataCenter Corp', 'NetAccess Provider', 'GlobalNet Services', 'TechHost Solutions'];
+            return orgs[Math.floor(Math.random() * orgs.length)];
+        }
+
+        function assessThreat() {
+            const threatLevel = document.getElementById('threat-level').value;
+            if (!threatLevel) {
+                document.getElementById('level3-result').innerHTML = `
+                    <div class="error">
+                        <h4>Assessment Required</h4>
+                        <p>Please select a threat level based on the collected evidence.</p>
+                    </div>`;
+                return;
+            }
+
+            investigationData.threatLevel = threatLevel;
+            addToTimeline(`Assessed threat level as: ${threatLevel}`);
+
+            const expectedThreatLevel = investigationData.abuseScore > 70 || investigationData.talosScore < 30 ? 'high' : 'medium';
+            
+            if (threatLevel === 'high' || threatLevel === 'critical') {
+                document.getElementById('level3-result').innerHTML = `
+                    <div class="success">
+                        <h4>Threat Assessment Complete</h4>
+                        <p>Your assessment matches the evidence collected. High-risk indicators include:</p>
+                        <ul>
+                            <li>AbuseIPDB Confidence Score: ${investigationData.abuseScore}%</li>
+                            <li>Recent Reports: ${investigationData.reportCount}</li>
+                            <li>Talos Reputation: ${investigationData.talosScore}%</li>
+                        </ul>
+                        <p>Proceeding to response actions...</p>
+                    </div>`;
+                
+                setTimeout(() => {
+                    currentLevel = 4;
+                    showLevel(4);
+                }, 2000);
+            } else {
+                document.getElementById('level3-result').innerHTML = `
+                    <div class="error">
+                        <h4>Assessment Review Needed</h4>
+                        <p>Consider the following high-risk indicators:</p>
+                        <ul>
+                            <li>High number of recent reports</li>
+                            <li>Low reputation scores</li>
+                            <li>Malicious activity patterns</li>
+                        </ul>
+                        <p>Please reassess the threat level.</p>
+                    </div>`;
+            }
+        }
+
+        function handleEscalation() {
+            const selectedActions = Array.from(document.querySelectorAll('#escalation-steps input:checked'))
+                .map(input => input.value);
+            
+            investigationData.responseActions = selectedActions;
+            
+            if (selectedActions.length < 4) {
+                document.getElementById('level4-result').innerHTML = `
+                    <div class="error">
+                        <h4>Insufficient Response Actions</h4>
+                        <p>A comprehensive response plan should include multiple layers of action:</p>
+                        <ul>
+                            <li>Documentation for audit trails</li>
+                            <li>Team notification for coordination</li>
+                            <li>Blocking measures for prevention</li>
+                            <li>Reporting for community protection</li>
+                            <li>Monitoring for pattern detection</li>
+                        </ul>
+                    </div>`;
+                return;
+            }
+
+            if (selectedActions.includes('document') && selectedActions.includes('block') && 
+                selectedActions.includes('report') && selectedActions.includes('monitor')) {
+                
+                selectedActions.forEach(action => addToTimeline(`Executed response action: ${action}`));
+                
+                document.getElementById('level4-result').innerHTML = `
+                    <div class="success">
+                        <h4>Response Plan Executed Successfully</h4>
+                        <p>All critical actions have been implemented:</p>
+                        <ul>
+                            ${selectedActions.map(action => `<li>${action.charAt(0).toUpperCase() + action.slice(1)}</li>`).join('')}
+                        </ul>
+                        <p>Generating final report...</p>
+                    </div>`;
+
+                setTimeout(() => {
+                    showFinalReport();
+                }, 2000);
+            } else {
+                document.getElementById('level4-result').innerHTML = `
+                    <div class="error">
+                        <h4>Missing Critical Actions</h4>
+                        <p>Please ensure your response plan includes all necessary security measures.</p>
+                    </div>`;
+            }
+        }
+
+        function showFinalReport() {
+            document.querySelectorAll('.level').forEach(el => el.style.display = 'none');
+            const finalScreen = document.getElementById('final-screen');
+            finalScreen.style.display = 'block';
+            
+            document.getElementById('investigation-summary').innerHTML = `
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-title">Investigation Timeline</div>
+                        <div style="margin-top: 10px;">
+                            ${investigationData.timeline.map(entry => `<div>${entry}</div>`).join('')}
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-title">Key Findings</div>
+                        <ul>
+                            <li>IP Address: ${investigationData.ipAddress}</li>
+                            <li>Threat Level: ${investigationData.threatLevel.toUpperCase()}</li>
+                            <li>AbuseIPDB Score: ${investigationData.abuseScore}%</li>
+                            <li>Talos Score: ${investigationData.talosScore}%</li>
+                            <li>Total Reports: ${investigationData.reportCount}</li>
+                        </ul>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-title">Actions Taken</div>
+                        <ul>
+                            ${investigationData.responseActions.map(action => 
+                                `<li>${action.charAt(0).toUpperCase() + action.slice(1)}</li>`
+                            ).join('')}
+                        </ul>
+                    </div>
+                </div>`;
+            
+            updateProgress();
+        }
+
+        function resetGame() {
+            currentLevel = 1;
+            suspiciousIP = '';
+            investigationData = {
+                ipAddress: '',
+                abuseScore: 0,
+                talosScore: 0,
+                reportCount: 0,
+                threatLevel: '',
+                responseActions: [],
+                timeline: []
+            };
+            databasesChecked = { abuseipdb: false, talos: false, whois: false };
+            
+            // Reset all form elements
+            document.getElementById('ip-input').value = '';
+            document.getElementById('threat-level').value = '';
+            document.querySelectorAll('#escalation-steps input').forEach(input => input.checked = false);
+            document.querySelectorAll('.result').forEach(div => div.innerHTML = '');
+            document.getElementById('abuse-score').textContent = '-';
+            document.getElementById('report-count').textContent = '-';
+            document.getElementById('talos-score').textContent = '-';
+            
+            // Hide final screen and show first level
+            document.getElementById('final-screen').style.display = 'none';
+            showLevel(1);
+        }
+    </script>
+</body>
+</html>
